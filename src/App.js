@@ -5,7 +5,7 @@ import './App.css';
 import Addmovie from './components/Addmovie';
 
 function App() {
- const [movie, setMovie] = useState([])
+ const [movies, setMovies] = useState([])
  const [isLoading, setIsLoading] = useState([])
  const [error, setError] = useState(null)
  
@@ -31,7 +31,7 @@ function App() {
         })
       }
     
-      setMovie(loadedMovies)
+      setMovies(loadedMovies)
     }catch(error){
       setError(error.message)
     }
@@ -50,16 +50,18 @@ function App() {
       if (!response.ok) {
         throw new Error('Failed to delete movie');
       }
-      // Remove the deleted movie from the movies state
-      setMovie(prevMovies => prevMovies.filter(movie => movie.id !== id));
+      // Update the movies state by filtering out the deleted movie
+      setMovies(prevMovies => prevMovies.filter(m => m.id !== id));
+      console.log("click delete handler", id)
     } catch (error) {
       setError(error.message);
     }
   };
   
+  
   let content = <p>Found no movies</p>
-  if(movie.length > 0){
-    content = <MoviesList movies={movie} onDeleteMovie={deleteMovieHandler}  />
+  if(movies.length > 0){
+    content = <MoviesList movies={movies} onDeleteMovie={deleteMovieHandler}  />
   }
   if(error) {
     content = <p>{error}</p>
@@ -69,22 +71,31 @@ function App() {
   }
   
 
-     async function addMovieHandler(movie) {
-         const response = await fetch('https://movielist-1685e-default-rtdb.firebaseio.com/movies.json',{
+     async function addMovieHandler(movies) {
+      try{
+        const response = await fetch('https://movielist-1685e-default-rtdb.firebaseio.com/movies.json',{
             method:'POST',
-            body: JSON.stringify(movie),
+            body: JSON.stringify(movies),
             headers:{
               'Content-Type' : 'application/json'
             }
           })
+          if(!response.ok){
+            throw new Error('Failed to add movie')
+          }
           const data = await response.json();
           console.log(data)
+          setMovies(prevMovies => [...prevMovies, {id: data.name, ...movies}]);
+      }catch(error){
+        setError(error.message)
+      } 
         }
 
   return (
     <React.Fragment>
       <section>
       <Addmovie onAddMovie={addMovieHandler} />
+      <br></br>
         <button onClick={fetchMoviehandler}>Fetch Movies</button>
       </section>
       <section>

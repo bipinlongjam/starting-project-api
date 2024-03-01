@@ -3,7 +3,7 @@ import React from 'react';
 import classes from './Movie.module.css';
 
 const Movie = (props) => {
-  const {title, releaseDate, openingText, onDelete} = props;
+  const {id, title, releaseDate, openingText, onDelete} = props;
 
   const deleteHandler = () =>{
     onDelete(props.id)
