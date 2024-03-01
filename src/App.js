@@ -13,21 +13,25 @@ function App() {
     setIsLoading(true);
     setError(null)
     try{
-      const response = await fetch('https://swapi.dev/api/films/')
+      const response = await fetch('https://movielist-1685e-default-rtdb.firebaseio.com/movies.json')
       
       if(!response.ok){
         throw new Error('Something went wrong!')
       }
       const data =  await response.json();
-      const transformedMovies = data.results.map(movieData =>{
-        return {
-          id:movieData.episode_id,
-          title:movieData.title,
-          openingText:movieData.opening_crawl,
-          releaseDate:movieData.release_date
-        }
-      })
-      setMovie(transformedMovies)
+
+      const loadedMovies = [];
+
+      for(const key in data){
+        loadedMovies.push({
+          id:key,
+          title:data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate
+        })
+      }
+    
+      setMovie(loadedMovies)
     }catch(error){
       setError(error.message)
     }
@@ -38,9 +42,24 @@ function App() {
     fetchMoviehandler()
   },[fetchMoviehandler])
 
+  const deleteMovieHandler = async (id) => {
+    try {
+      const response = await fetch(`https://movielist-1685e-default-rtdb.firebaseio.com/movies/${id}.json`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete movie');
+      }
+      // Remove the deleted movie from the movies state
+      setMovie(prevMovies => prevMovies.filter(movie => movie.id !== id));
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+  
   let content = <p>Found no movies</p>
   if(movie.length > 0){
-    content = <MoviesList movies={movie} />
+    content = <MoviesList movies={movie} onDeleteMovie={deleteMovieHandler}  />
   }
   if(error) {
     content = <p>{error}</p>
@@ -49,12 +68,18 @@ function App() {
     content = <p>Loading...</p>
   }
   
-  const addMovieHandler = (movieData) => {
-    // Logic to add the movie to the list
-    setMovie(prevMovies => [...prevMovies, movieData]);
-    console.log('Added Movie:', movieData);
-};
 
+     async function addMovieHandler(movie) {
+         const response = await fetch('https://movielist-1685e-default-rtdb.firebaseio.com/movies.json',{
+            method:'POST',
+            body: JSON.stringify(movie),
+            headers:{
+              'Content-Type' : 'application/json'
+            }
+          })
+          const data = await response.json();
+          console.log(data)
+        }
 
   return (
     <React.Fragment>

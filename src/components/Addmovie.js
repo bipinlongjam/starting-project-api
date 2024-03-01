@@ -1,61 +1,46 @@
-import React,{useState} from 'react'
-import classes from './Addmovie.module.css'
+import React, { useRef } from 'react';
 
-const Addmovie = ({ onAddMovie }) => {
-  
-    const [title, setTitle] = useState('');
-    const [openingText, setOpeningText] = useState('');
-    const [releaseDate, setReleaseDate] = useState('');
+import classes from './Addmovie.module.css';
 
-  const submitHandler = (event) => {
+function Addmovie(props) {
+  const titleRef = useRef('');
+  const openingTextRef = useRef('');
+  const releaseDateRef = useRef('');
+
+  function submitHandler(event) {
     event.preventDefault();
 
-    const movieData = {
-      title,
-      openingText,
-      releaseDate
+    // could add validation here...
+
+    const movie = {
+      title: titleRef.current.value,
+      openingText: openingTextRef.current.value,
+      releaseDate: releaseDateRef.current.value,
     };
 
-    onAddMovie(movieData);
-
-    // Clear form fields after submission
-    setTitle('');
-    setOpeningText('');
-    setReleaseDate('');
-  };
+    props.onAddMovie(movie);
+    titleRef.current.value = '';
+    openingTextRef.current.value = '';
+    releaseDateRef.current.value = '';
+  }
 
   return (
-    <form className={classes['form-container']}onSubmit={submitHandler}>
-      <div>
-        <label>Title:</label>
-        <input
-          type="text"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          required
-        />
+    <form onSubmit={submitHandler}>
+      <div className={classes.control}>
+        <label htmlFor='title'>Title</label>
+        <input type='text' id='title' ref={titleRef} />
       </div>
-      <div>
-        <label>Opening Text:</label>
-        <textarea
-          rows="5"
-          value={openingText}
-          onChange={(event) => setOpeningText(event.target.value)}
-          required
-        />
+      <div className={classes.control}>
+        <label htmlFor='opening-text'>Opening Text</label>
+        <textarea rows='5' id='opening-text' ref={openingTextRef}></textarea>
       </div>
-      <div>
-        <label>Release Date:</label>
-        <input
-          type="date"
-          value={releaseDate}
-          onChange={(event) => setReleaseDate(event.target.value)}
-          required
-        />
+      <div className={classes.control}>
+        <label htmlFor='date'>Release Date</label>
+        <input type='text' id='date' ref={releaseDateRef} />
       </div>
-      <button type="submit">Add Movie</button>
+      <button>Add Movie</button>
     </form>
   );
 }
 
-export default Addmovie
+export default Addmovie;
